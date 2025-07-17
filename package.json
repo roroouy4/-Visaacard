@@ -1,0 +1,20 @@
+{
+  "name": "payment-site",
+  "version": "1.0.0",
+  "description": "موقع إدخال تفاصيل الدفع مع إرسال البيانات إلى Telegram",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "build": "echo 'No build step required for static site'"
+  },
+  "keywords": [
+    "payment",
+    "telegram",
+    "arabic"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}

