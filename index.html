@@ -173,6 +173,24 @@
                 alert('حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
             }
         }
+
+        // تنسيق تاريخ الانتهاء تلقائيًا
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // إزالة كل شيء عدا الأرقام
+            
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            
+            e.target.value = value;
+        });
+
+        // منع إدخال أحرف غير رقمية في تاريخ الانتهاء
+        document.getElementById('expiryDate').addEventListener('keypress', function(e) {
+            if (!/\d/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                e.preventDefault();
+            }
+        });
     </script>
 
 </body>
